@@ -147,6 +147,10 @@ export default function RootLayout({
       "Substance Abuse Rehabilitation",
       "Psychiatric Counselling",
     ],
+    sameAs: [
+      "https://www.instagram.com/shraddha_rehab/",
+      "https://www.justdial.com/Hyderabad/Shraddha-De-Addiction-Rehabilitation-Centre-Uppal",
+    ],
   };
 
   return (

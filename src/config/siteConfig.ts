@@ -124,9 +124,9 @@ export const siteConfig = {
     name: "D. Sreekanth Chary",
     role: "Founder, Shraddha Rehabilitation Centre",
     badge: "Founder's Desk • 13 Years of Recovery & Service",
-    imageUrl: "/images/founder-sreekanth.jpeg",
+    imageUrl: "/images/founder-sreekanth.jpg",
     imageFallback:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=80",
+      "/images/founder-sreekanth.jpg",
     shortBio:
       "Having overcome chronic alcoholism through dedicated treatment in 2013, D. Sreekanth Chary has walked the path of recovery for 13 years. Guided by the principles of Alcoholics Anonymous (A.A.) and a deep spiritual awakening, he turned his personal triumph into a lifelong mission. Over the past 13 years, he has helped hundreds of individuals break free from addiction, offering them not just clinical support, but the lived empathy, spiritual tools, and hope needed to rebuild their lives from the ground up.",
     modalTitle:

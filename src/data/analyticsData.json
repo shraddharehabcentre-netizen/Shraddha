@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1793619994946-s6crg",
+    "sessionId": "vis_mvz714xf_41ta",
+    "type": "pageview",
+    "path": "/",
+    "durationSec": 5,
+    "device": "Desktop",
+    "referrer": "Direct / Bookmark",
+    "timestamp": 1793619994946
+  },
+  {
+    "id": "1793619994946-wfqvr",
+    "sessionId": "vis_mvz714xf_41ta",
+    "type": "pageview",
+    "path": "/",
+    "durationSec": 6,
+    "device": "Desktop",
+    "referrer": "Direct / Bookmark",
+    "timestamp": 1793619994946
+  },
+  {
+    "id": "1793620000821-b7pla",
+    "sessionId": "vis_mvz714xf_41ta",
+    "type": "duration",
+    "path": "/about",
+    "durationSec": 6,
+    "device": "Desktop",
+    "referrer": "Direct / Bookmark",
+    "timestamp": 1793620000821
+  },
+  {
+    "id": "1793620000834-l8746",
+    "sessionId": "vis_mvz714xf_41ta",
+    "type": "pageview",
+    "path": "/facility",
+    "durationSec": 10,
+    "device": "Desktop",
+    "referrer": "Direct / Bookmark",
+    "timestamp": 1793620000834
+  }
+]

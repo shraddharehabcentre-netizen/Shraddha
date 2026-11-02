@@ -25,6 +25,7 @@ export const siteConfig = {
     tagline: "Faith. Dignity. Clinical Recovery.",
     city: "Uppal, Hyderabad",
     state: "Telangana",
+    url: "https://www.shraddharehab.in", // 👈 Add this line (Update with your live domain)
   },
 
   contact: {

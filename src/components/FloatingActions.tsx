@@ -2,9 +2,10 @@
 
 import React from "react";
 import { Phone, MessageCircle } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
-export function FloatingActions() {
+  export function FloatingActions() {
+    const { config: siteConfig } = useSiteConfig();
   return (
     <>
       {/* MOBILE (< 640px): Sleek Docked Bottom Action Bar (Never obscures form inputs or headings) */}

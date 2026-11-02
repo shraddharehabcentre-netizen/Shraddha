@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Phone, ShieldAlert, Menu, X, MessageCircle } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { ShraddhaLogo } from "@/components/ui/ShraddhaLogo";
 
 const navLinks = [
@@ -16,6 +16,7 @@ const navLinks = [
 ];
 
 export function Navbar() {
+  const { config: siteConfig } = useSiteConfig();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 

@@ -17,8 +17,10 @@ import {
 } from "lucide-react";
 import { siteConfig } from "@/config/siteConfig";
 import { Reveal } from "@/components/ui/Reveal";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function AboutPage() {
+  const { config: siteConfig } = useSiteConfig();
   const [isJourneyOpen, setIsJourneyOpen] = useState(false);
   const [founderImgSrc, setFounderImgSrc] = useState(
     siteConfig.founder.imageUrl

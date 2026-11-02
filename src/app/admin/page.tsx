@@ -20,6 +20,8 @@ import {
   Smartphone,
   MessageCircle,
   RefreshCw,
+  KeyRound,
+  EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -42,7 +44,16 @@ function formatDuration(seconds: number): string {
 export default function AdminDashboardPage() {
   const { config, updateLocalConfig, refreshConfig } = useSiteConfig();
   const [pin, setPin] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [verifying, setVerifying] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
+
+  // Change Password State
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMsg, setPasswordMsg] = useState("");
+
   const [activeTab, setActiveTab] = useState<
     | "analytics"
     | "contact"
@@ -51,6 +62,7 @@ export default function AdminDashboardPage() {
     | "programs"
     | "schedule"
     | "faqs"
+    | "security"
   >("analytics");
 
   const [draft, setDraft] = useState<SiteConfigType>(config);
@@ -77,7 +89,7 @@ export default function AdminDashboardPage() {
         setEvents(data.events || []);
       }
     } catch {
-      // Ignore error
+      // Ignore
     } finally {
       setLoadingAnalytics(false);
     }
@@ -89,7 +101,6 @@ export default function AdminDashboardPage() {
     }
   }, [unlocked]);
 
-  // Filter events by selected Time Period (Today, 7 Days, 30 Days, All Time)
   const filteredStats = useMemo(() => {
     const now = Date.now();
     const cutoff =
@@ -123,11 +134,7 @@ export default function AdminDashboardPage() {
       (e) => e.type === "whatsapp_click"
     ).length;
 
-    // Top Pages breakdown
-    const pageMap: Record<
-      string,
-      { views: number; totalSec: number }
-    > = {};
+    const pageMap: Record<string, { views: number; totalSec: number }> = {};
     pageviews.forEach((pv) => {
       if (!pageMap[pv.path]) {
         pageMap[pv.path] = { views: 0, totalSec: 0 };
@@ -144,7 +151,6 @@ export default function AdminDashboardPage() {
       }))
       .sort((a, b) => b.views - a.views);
 
-    // Top Referrers breakdown
     const refMap: Record<string, number> = {};
     pageviews.forEach((pv) => {
       const ref = pv.referrer || "Direct";
@@ -167,40 +173,97 @@ export default function AdminDashboardPage() {
     };
   }, [events, timeRange]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin.trim() === "shraddha2026") {
-      setUnlocked(true);
-    } else {
-      alert("Incorrect Admin PIN. Default PIN is: shraddha2026");
+    setVerifying(true);
+    setLoginError("");
+
+    try {
+      const res = await fetch("/api/cms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verify", pin: pin.trim() }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setUnlocked(true);
+      } else {
+        setLoginError(data.error || "Incorrect Password. Access denied.");
+      }
+    } catch {
+      setLoginError("Network error while verifying password.");
+    } finally {
+      setVerifying(false);
     }
   };
 
   const handleSaveAll = async () => {
     setSaveStatus("saving");
     setStatusMessage("");
+
+    // 1. Update local state & localStorage immediately across all open tabs
     updateLocalConfig(draft);
 
     try {
       const res = await fetch("/api/cms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin: pin || "shraddha2026", config: draft }),
+        body: JSON.stringify({ pin: pin.trim(), config: draft }),
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
         await refreshConfig();
         setSaveStatus("saved");
-        setStatusMessage("All changes saved and published live!");
-        setTimeout(() => setSaveStatus("idle"), 3500);
+        setStatusMessage(
+          "All changes saved and published live across all pages!"
+        );
+        setTimeout(() => setSaveStatus("idle"), 4000);
       } else {
         setSaveStatus("error");
         setStatusMessage(data.error || "Failed to save on server.");
       }
     } catch {
       setSaveStatus("saved");
-      setStatusMessage("Saved to device storage.");
+      setStatusMessage("Changes saved to browser storage.");
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMsg("");
+
+    if (newPassword.trim().length < 4) {
+      setPasswordMsg("Error: New password must be at least 4 characters.");
+      return;
+    }
+    if (newPassword.trim() !== confirmPassword.trim()) {
+      setPasswordMsg("Error: New password and confirmation do not match.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/cms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "change_password",
+          pin: pin.trim(),
+          newPin: newPassword.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPin(newPassword.trim());
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordMsg("Success: Your private admin password has been updated!");
+      } else {
+        setPasswordMsg(`Error: ${data.error || "Could not update password."}`);
+      }
+    } catch {
+      setPasswordMsg("Error: Network issue while updating password.");
     }
   };
 
@@ -217,7 +280,7 @@ export default function AdminDashboardPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        pin: pin || "shraddha2026",
+        pin: pin.trim(),
         config: defaultSiteConfig,
       }),
     });
@@ -233,31 +296,52 @@ export default function AdminDashboardPage() {
             <Lock className="w-6 h-6" />
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl text-ink-900 font-semibold">
-            Shraddha Founder CMS & Analytics
+            Shraddha Private Admin
           </h1>
           <p className="text-xs sm:text-sm text-ink-600 mt-1.5 mb-6">
-            Simple controller for D. Sreekanth Chary to view live visitor analytics, viewing times, and edit website content.
+            Authorized access only. Enter your private administrator password to view analytics and manage website content.
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-ink-900 mb-2">
-                Enter Admin PIN
+                Administrator Password
               </label>
-              <input
-                type="password"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                placeholder="Enter PIN (shraddha2026)"
-                className="w-full px-4 py-3.5 rounded-xl bg-background border border-slate-300 text-sm focus:outline-none focus:border-brand-700"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  placeholder="Enter your private password"
+                  className="w-full px-4 py-3.5 pr-11 rounded-xl bg-background border border-slate-300 text-sm focus:outline-none focus:border-brand-700"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-600 hover:text-ink-900"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
+
+            {loginError && (
+              <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 p-3 rounded-xl">
+                {loginError}
+              </p>
+            )}
+
             <button
               type="submit"
+              disabled={verifying}
               className="w-full py-3.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold text-sm transition-all"
             >
-              Unlock Dashboard
+              {verifying ? "Verifying..." : "Unlock Admin Dashboard"}
             </button>
           </form>
         </div>
@@ -322,12 +406,13 @@ export default function AdminDashboardPage() {
       <div className="flex overflow-x-auto gap-2 pb-2 mb-6 no-scrollbar">
         {[
           { id: "analytics", label: "1. Live Visitors & Viewing Time", icon: BarChart3 },
-          { id: "contact", label: "2. Phone & Address", icon: Phone },
+          { id: "contact", label: "2. Phone, Hero & Founder", icon: Phone },
           { id: "pickup", label: "3. Home Pickup Banner", icon: Ambulance },
           { id: "addictions", label: "4. What We Treat (6)", icon: Stethoscope },
           { id: "programs", label: "5. Programs (01-04)", icon: Layers },
           { id: "schedule", label: "6. Daily Timetable", icon: Clock },
           { id: "faqs", label: "7. FAQs", icon: HelpCircle },
+          { id: "security", label: "8. Change Password", icon: KeyRound },
         ].map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -349,12 +434,9 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      {/* =========================================================
-          TAB 1: REAL-TIME VISITOR ANALYTICS, VIEWING TIME & PERIOD FILTER
-         ========================================================= */}
+      {/* TAB 1: ANALYTICS */}
       {activeTab === "analytics" && (
         <div className="space-y-6">
-          {/* Time Period Filter Bar */}
           <div className="bg-white rounded-3xl p-5 sm:p-7 border border-slate-200 shadow-apple flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="font-serif text-xl sm:text-2xl font-semibold text-ink-900">
@@ -401,7 +483,6 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* 6 KPI Metric Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-apple">
               <div className="flex items-center justify-between text-brand-700 mb-2">
@@ -494,16 +575,14 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          {/* Top Pages + Traffic Sources Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Most Viewed Pages & Avg Viewing Time */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-apple">
               <h3 className="font-serif text-lg sm:text-xl font-semibold text-ink-900 mb-4">
                 Most Viewed Pages & Reading Time
               </h3>
               {filteredStats.topPages.length === 0 ? (
                 <p className="text-xs text-ink-600 py-6">
-                  No visitor data recorded for this time period yet. Browse the site in another tab and click Refresh!
+                  No visitor data recorded for this time period yet.
                 </p>
               ) : (
                 <div className="divide-y divide-slate-100">
@@ -529,7 +608,6 @@ export default function AdminDashboardPage() {
               )}
             </div>
 
-            {/* Traffic Sources */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-apple">
               <h3 className="font-serif text-lg sm:text-xl font-semibold text-ink-900 mb-4">
                 Where Visitors Come From (Sources)
@@ -557,76 +635,20 @@ export default function AdminDashboardPage() {
               )}
             </div>
           </div>
-
-          {/* Recent Live Visitor Activity Log */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-apple">
-            <h3 className="font-serif text-lg sm:text-xl font-semibold text-ink-900 mb-4">
-              Recent Live Visitor Activity Log
-            </h3>
-            {filteredStats.recentEvents.length === 0 ? (
-              <p className="text-xs text-ink-600">No recent activity yet.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs sm:text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-200 text-ink-600">
-                      <th className="py-2.5 pr-4">Time</th>
-                      <th className="py-2.5 pr-4">Action</th>
-                      <th className="py-2.5 pr-4">Page</th>
-                      <th className="py-2.5 pr-4">Viewing Time</th>
-                      <th className="py-2.5 pr-4">Device</th>
-                      <th className="py-2.5">Source</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredStats.recentEvents.map((ev) => (
-                      <tr key={ev.id}>
-                        <td className="py-2.5 pr-4 text-ink-600 whitespace-nowrap">
-                          {new Date(ev.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                        <td className="py-2.5 pr-4 font-semibold">
-                          {ev.type === "call_click" ? (
-                            <span className="text-amber-700">📞 Clicked Call</span>
-                          ) : ev.type === "whatsapp_click" ? (
-                            <span className="text-emerald-700">
-                              💬 Clicked WhatsApp
-                            </span>
-                          ) : (
-                            <span className="text-brand-700">👁️ Viewed Page</span>
-                          )}
-                        </td>
-                        <td className="py-2.5 pr-4 font-mono">{ev.path}</td>
-                        <td className="py-2.5 pr-4">
-                          {ev.type === "pageview"
-                            ? formatDuration(ev.durationSec || 5)
-                            : "—"}
-                        </td>
-                        <td className="py-2.5 pr-4">{ev.device}</td>
-                        <td className="py-2.5 text-ink-600">{ev.referrer}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
         </div>
       )}
 
-      {/* TAB 2: CONTACT, ADDRESS & HERO */}
+      {/* TAB 2: CONTACT, ADDRESS, HERO & FOUNDER BIO */}
       {activeTab === "contact" && (
         <div className="bg-white rounded-3xl p-6 sm:p-9 border border-slate-200 shadow-apple space-y-6">
           <h2 className="font-serif text-xl sm:text-2xl font-semibold text-ink-900 border-b border-slate-100 pb-3">
-            Helpline Numbers, WhatsApp & Address
+            Helpline Numbers, WhatsApp, Hero & Founder Bio
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
               <label className="block text-xs font-bold uppercase text-ink-900 mb-1.5">
-                Primary Phone (Displayed on Site)
+                Primary Phone (Displayed Across Site)
               </label>
               <input
                 type="text"
@@ -703,7 +725,7 @@ export default function AdminDashboardPage() {
 
           <div>
             <label className="block text-xs font-bold uppercase text-ink-900 mb-1.5">
-              Full Centre Address
+              Full Centre Address (Navbar, Footer & Contact Page)
             </label>
             <input
               type="text"
@@ -718,20 +740,17 @@ export default function AdminDashboardPage() {
             />
           </div>
 
-          <div>
+          <div className="pt-4 border-t border-slate-100">
             <label className="block text-xs font-bold uppercase text-ink-900 mb-1.5">
-              Default Pre-filled WhatsApp Message
+              Founder&apos;s Short Bio (Displayed on About Page)
             </label>
             <textarea
-              rows={2}
-              value={draft.contact.whatsappDefaultMsg}
+              rows={4}
+              value={draft.founder.shortBio}
               onChange={(e) =>
                 setDraft({
                   ...draft,
-                  contact: {
-                    ...draft.contact,
-                    whatsappDefaultMsg: e.target.value,
-                  },
+                  founder: { ...draft.founder, shortBio: e.target.value },
                 })
               }
               className="w-full px-4 py-3 rounded-xl bg-background border border-slate-300 text-sm"
@@ -838,7 +857,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB 4: WHAT WE TREAT (6 ADDICTIONS & POPUP DETAILS) */}
+      {/* TAB 4: WHAT WE TREAT */}
       {activeTab === "addictions" && (
         <div className="space-y-6">
           {draft.addictionsWeTreat.map((item, idx) => (
@@ -918,28 +937,12 @@ export default function AdminDashboardPage() {
                   className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-slate-300 text-sm"
                 />
               </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase text-ink-900 mb-1">
-                  Guidance Note for Families (Inside Popup)
-                </label>
-                <input
-                  type="text"
-                  value={item.familyNote}
-                  onChange={(e) => {
-                    const updated = [...draft.addictionsWeTreat];
-                    updated[idx] = { ...item, familyNote: e.target.value };
-                    setDraft({ ...draft, addictionsWeTreat: updated });
-                  }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-slate-300 text-sm"
-                />
-              </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* TAB 5: RECOVERY PROGRAMS (01-04) */}
+      {/* TAB 5: RECOVERY PROGRAMS */}
       {activeTab === "programs" && (
         <div className="space-y-6">
           {draft.programs.map((prog, idx) => (
@@ -997,22 +1000,6 @@ export default function AdminDashboardPage() {
                   onChange={(e) => {
                     const updated = [...draft.programs];
                     updated[idx] = { ...prog, description: e.target.value };
-                    setDraft({ ...draft, programs: updated });
-                  }}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-slate-300 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase text-ink-900 mb-1">
-                  Who Is It For (Shown in Detail Popup)
-                </label>
-                <textarea
-                  rows={2}
-                  value={prog.whoIsItFor}
-                  onChange={(e) => {
-                    const updated = [...draft.programs];
-                    updated[idx] = { ...prog, whoIsItFor: e.target.value };
                     setDraft({ ...draft, programs: updated });
                   }}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-background border border-slate-300 text-sm"
@@ -1102,6 +1089,67 @@ export default function AdminDashboardPage() {
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* TAB 8: CHANGE ADMIN PASSWORD */}
+      {activeTab === "security" && (
+        <div className="bg-white rounded-3xl p-6 sm:p-9 border border-slate-200 shadow-apple max-w-xl">
+          <h2 className="font-serif text-xl sm:text-2xl font-semibold text-ink-900 border-b border-slate-100 pb-3">
+            Change Administrator Password
+          </h2>
+          <p className="text-xs sm:text-sm text-ink-600 mt-2 mb-6">
+            Update the private password used to unlock this `/admin` dashboard.
+          </p>
+
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-ink-900 mb-1.5">
+                New Private Password
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="w-full px-4 py-3 rounded-xl bg-background border border-slate-300 text-sm"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-ink-900 mb-1.5">
+                Confirm New Password
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter new password"
+                className="w-full px-4 py-3 rounded-xl bg-background border border-slate-300 text-sm"
+                required
+              />
+            </div>
+
+            {passwordMsg && (
+              <div
+                className={`p-3.5 rounded-xl text-xs font-semibold ${
+                  passwordMsg.startsWith("Success")
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-rose-50 text-rose-700 border border-rose-200"
+                }`}
+              >
+                {passwordMsg}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="px-6 py-3.5 rounded-xl bg-ink-900 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold transition-all"
+            >
+              Update Private Password
+            </button>
+          </form>
         </div>
       )}
     </div>

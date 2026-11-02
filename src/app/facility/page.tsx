@@ -3,11 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import { Clock, ShieldCheck, Sun, Sunset, Moon, ArrowRight } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Reveal } from "@/components/ui/Reveal";
 import { FacilityImage } from "@/components/ui/FacilityImage";
 
 export default function FacilityPage() {
+  const { config: siteConfig } = useSiteConfig();
   return (
     <div className="py-8 sm:py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">

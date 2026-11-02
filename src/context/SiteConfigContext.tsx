@@ -23,29 +23,49 @@ export function SiteConfigProvider({
   const [config, setConfig] = useState<SiteConfigType>(defaultConfig);
 
   const refreshConfig = async () => {
+    // 1. Load immediate local override if saved on this browser
+    let localData: SiteConfigType | null = null;
+    try {
+      const cached = localStorage.getItem("shraddha_cms_override");
+      if (cached) {
+        localData = JSON.parse(cached);
+        if (localData) setConfig(localData);
+      }
+    } catch {
+      // Ignore
+    }
+
+    // 2. Fetch latest server state
     try {
       const res = await fetch("/api/cms", { cache: "no-store" });
       if (res.ok) {
         const serverData = await res.json();
-        setConfig(serverData);
-        return;
+        // If server has custom data (or no local override exists), apply server data
+        if (!localData || JSON.stringify(serverData) !== JSON.stringify(defaultConfig)) {
+          setConfig(serverData);
+          localStorage.setItem("shraddha_cms_override", JSON.stringify(serverData));
+        }
       }
     } catch {
-      // Fallback to localStorage override if offline
-    }
-
-    try {
-      const cached = localStorage.getItem("shraddha_cms_override");
-      if (cached) {
-        setConfig(JSON.parse(cached));
-      }
-    } catch {
-      // Ignore storage error
+      // Offline fallback already handled by localData
     }
   };
 
   useEffect(() => {
     refreshConfig();
+
+    // Sync across multiple open tabs immediately when Admin clicks Save
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "shraddha_cms_override" && e.newValue) {
+        try {
+          setConfig(JSON.parse(e.newValue));
+        } catch {
+          // Ignore
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
   const updateLocalConfig = (newConfig: SiteConfigType) => {
@@ -53,7 +73,7 @@ export function SiteConfigProvider({
     try {
       localStorage.setItem("shraddha_cms_override", JSON.stringify(newConfig));
     } catch {
-      // Ignore storage error
+      // Ignore
     }
   };
 

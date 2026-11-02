@@ -1,10 +1,15 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
+import { Phone, Mail, MapPin, ArrowUpRight, MessageCircle } from "lucide-react";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { ShraddhaLogo } from "@/components/ui/ShraddhaLogo";
 
+
+
 export function Footer() {
+  const { config: siteConfig } = useSiteConfig();
   return (
     <footer className="bg-ink-900 text-slate-300 pt-20 pb-28 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">

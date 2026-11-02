@@ -10,10 +10,11 @@ import {
   Calendar,
   AlertCircle,
 } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Reveal } from "@/components/ui/Reveal";
 
 export default function ContactPage() {
+  const { config: siteConfig } = useSiteConfig();
   const [inquiryType, setInquiryType] = useState<"visit" | "callback">("visit");
   const [status, setStatus] = useState<
     "idle" | "submitting" | "success" | "error"

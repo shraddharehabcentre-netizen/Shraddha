@@ -11,10 +11,12 @@ import {
   RotateCcw,
   Sparkles,
 } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Reveal } from "@/components/ui/Reveal";
 
+
 export function SelfAssessment() {
+  const { config: siteConfig } = useSiteConfig();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const toggleQuestion = (id: string) => {

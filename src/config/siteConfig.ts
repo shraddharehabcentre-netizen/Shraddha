@@ -124,7 +124,7 @@ export const siteConfig = {
     name: "D. Sreekanth Chary",
     role: "Founder, Shraddha Rehabilitation Centre",
     badge: "Founder's Desk • 13 Years of Recovery & Service",
-    imageUrl: "/images/founder-sreekanth.jpg",
+    imageUrl: "/images/founder-sreekanth.jpeg",
     imageFallback:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=80",
     shortBio:

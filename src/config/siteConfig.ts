@@ -72,7 +72,7 @@ export const siteConfig = {
   // ==========================================
   conversionTriggers: {
     teluguTrustLine:
-      "మా వద్ద తెలుగు మరియు ఇంగ్లీష్ భాషలలో కౌన్సెలింగ్ అందుబాటులో ఉంది • Counselling available in Telugu & English",
+      "మా వద్ద తెలుగు భాషలో కౌన్సెలింగ్ అందుబాటులో ఉంది • Counselling available in Telugu",
     responseGuarantee:
       "Immediate Response Guarantee: Direct confidential guidance from Founder D. Sreekanth Chary & Senior Intake Team.",
     pickupBanner: {

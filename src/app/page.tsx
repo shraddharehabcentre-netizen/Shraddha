@@ -10,27 +10,42 @@ import {
   ShieldCheck,
   ChevronDown,
   MessageCircle,
+  Phone,
+  Plus,
+  Ambulance,
+  Sparkles,
 } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
+import { ConditionDetail, ProgramDetail } from "@/config/siteConfig";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { Reveal } from "@/components/ui/Reveal";
 import { SelfAssessment } from "@/components/SelfAssessment";
 import { FacilityImage } from "@/components/ui/FacilityImage";
+import {
+  ConditionDetailModal,
+  ProgramDetailModal,
+} from "@/components/TreatmentModals";
 
 export default function HomePage() {
+  const { config: siteConfig } = useSiteConfig();
   const [activeSpace, setActiveSpace] = useState(siteConfig.campusSpaces[0]);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [heroImgSrc, setHeroImgSrc] = useState(siteConfig.hero.portraitImageUrl);
 
+  // Popup Modal States
+  const [selectedCondition, setSelectedCondition] =
+    useState<ConditionDetail | null>(null);
+  const [selectedProgram, setSelectedProgram] =
+    useState<ProgramDetail | null>(null);
+
   return (
     <div className="overflow-hidden">
       {/* =========================================================
-          1. HERO SECTION (RESPONSIVE SPLIT LAYOUT FOR MOBILE & DESKTOP)
+          1. HERO SECTION (WITH TELUGU + ENGLISH CONVERSION TRIGGER)
          ========================================================= */}
-      <section className="relative bg-apple-mesh pt-4 pb-12 sm:pt-10 sm:pb-20 lg:pt-12 lg:pb-28">
+      <section className="relative bg-apple-mesh pt-4 pb-12 sm:pt-10 sm:pb-20 lg:pt-12 lg:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 lg:gap-12 xl:gap-16 items-center">
-            
-            {/* LEFT COLUMN: Portrait Card with Overlaid Serif Headline */}
+            {/* LEFT COLUMN: Portrait Card */}
             <div className="lg:col-span-5">
               <Reveal>
                 <div className="relative w-full max-w-[440px] mx-auto lg:mx-0 aspect-[4/4.6] sm:aspect-[4/4.8] rounded-2xl sm:rounded-3xl overflow-hidden shadow-apple border border-slate-200/80 bg-[#F5EFE6]">
@@ -63,7 +78,7 @@ export default function HomePage() {
               </Reveal>
             </div>
 
-            {/* RIGHT COLUMN: Editorial Quote, Mobile-Friendly CTAs & Trust Checks */}
+            {/* RIGHT COLUMN: Editorial Quote, CTAs & Telugu Trust Trigger */}
             <div className="lg:col-span-7 flex flex-col justify-center lg:pl-2 xl:pl-6">
               <Reveal delay={0.08}>
                 <blockquote className="font-serif italic font-semibold text-[clamp(1.15rem,3.8vw,2rem)] text-ink-900 leading-[1.45] max-w-2xl">
@@ -75,9 +90,17 @@ export default function HomePage() {
                 </blockquote>
               </Reveal>
 
-              {/* CTA Row: Full-width buttons on mobile, inline pill + link on desktop */}
-              <Reveal delay={0.15}>
-                <div className="mt-6 sm:mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
+              {/* Conversion Trigger: Telugu + English Support Pill */}
+              <Reveal delay={0.12}>
+                <div className="mt-4 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-50/90 border border-brand-200/80 text-xs sm:text-sm font-semibold text-brand-900 w-fit">
+                  <Sparkles className="w-4 h-4 text-accent-600 shrink-0" />
+                  <span>{siteConfig.conversionTriggers.teluguTrustLine}</span>
+                </div>
+              </Reveal>
+
+              {/* CTA Row */}
+              <Reveal delay={0.16}>
+                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6">
                   <Link
                     href="/contact"
                     className="inline-flex items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-full bg-brand-700 hover:bg-brand-800 text-white font-semibold text-sm sm:text-base shadow-apple transition-all text-center"
@@ -102,7 +125,7 @@ export default function HomePage() {
 
               {/* Trust Micro-Checkmarks */}
               <Reveal delay={0.22}>
-                <div className="mt-5 sm:mt-7 flex flex-col xs:flex-row flex-wrap items-start xs:items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-ink-600 font-medium">
+                <div className="mt-5 sm:mt-6 flex flex-col xs:flex-row flex-wrap items-start xs:items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-ink-600 font-medium">
                   {siteConfig.hero.trustChecks.map((check, index) => (
                     <div key={index} className="inline-flex items-center gap-1.5">
                       <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-700 stroke-[2.5] shrink-0" />
@@ -114,21 +137,21 @@ export default function HomePage() {
 
               {/* Quick Stats Strip */}
               <Reveal delay={0.28}>
-                <div className="mt-7 sm:mt-10 pt-6 sm:pt-8 border-t border-slate-200/80 grid grid-cols-3 gap-2 sm:gap-4 max-w-xl">
+                <div className="mt-7 sm:mt-9 pt-6 border-t border-slate-200/80 grid grid-cols-3 gap-2 sm:gap-4 max-w-xl">
                   <div>
                     <p className="font-serif text-xl sm:text-3xl font-bold text-brand-700">
                       24/7
                     </p>
                     <p className="text-[11px] sm:text-xs text-ink-600 mt-0.5 leading-tight">
-                      Medical Supervision
+                      Medical & Pickup Support
                     </p>
                   </div>
                   <div>
                     <p className="font-serif text-xl sm:text-3xl font-bold text-brand-700">
-                      1:6
+                      13+ Yrs
                     </p>
                     <p className="text-[11px] sm:text-xs text-ink-600 mt-0.5 leading-tight">
-                     Care/Resident Ratio
+                      Recovery Experience
                     </p>
                   </div>
                   <div>
@@ -142,7 +165,6 @@ export default function HomePage() {
                 </div>
               </Reveal>
             </div>
-
           </div>
         </div>
       </section>
@@ -150,7 +172,7 @@ export default function HomePage() {
       {/* =========================================================
           2. "YOU DON'T HAVE TO FIGHT THIS ALONE" SECTION
          ========================================================= */}
-      <section className="py-12 sm:py-20 lg:py-24 bg-background border-t border-slate-200/60">
+      <section className="py-12 sm:py-20 bg-background border-t border-slate-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
           <Reveal>
             <div className="text-center max-w-3xl mx-auto">
@@ -163,7 +185,7 @@ export default function HomePage() {
             </div>
           </Reveal>
 
-          <div className="mt-8 sm:mt-14 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
+          <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8">
             {siteConfig.empathySection.pillars.map((pillar, i) => (
               <Reveal key={i} delay={i * 0.08}>
                 <div className="h-full bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-apple">
@@ -184,12 +206,146 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================
-          3. INTERACTIVE FAMILY & SELF-ASSESSMENT SECTION
+          3. WHAT WE TREAT & HOW WE TREAT (6 ADDICTIONS + APPLE POPUPS)
+         ========================================================= */}
+      <section
+        id="what-we-treat"
+        className="py-14 sm:py-24 bg-surface/70 border-t border-slate-200/70 scroll-mt-16"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+          <Reveal>
+            <div className="max-w-3xl mb-10 sm:mb-14">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-brand-700">
+                Specialized De-Addiction & Behavioural Protocols
+              </span>
+              <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-ink-900 mt-1.5 leading-tight">
+                What We Treat & How We Treat
+              </h2>
+              <p className="text-ink-600 text-xs sm:text-base mt-3 leading-relaxed">
+                Click on any addiction below to open our detailed clinical overview—including warning signs, our 3-stage medical & 12-Step treatment process, and guidance for families.
+              </p>
+            </div>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+            {siteConfig.addictionsWeTreat.map((item, idx) => (
+              <Reveal key={item.id} delay={idx * 0.05}>
+                <div
+                  onClick={() => setSelectedCondition(item)}
+                  className="group cursor-pointer h-full bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 border border-slate-200/90 shadow-apple hover:shadow-apple-hover hover:border-brand-700/40 transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-50 text-brand-800 border border-brand-100">
+                        {item.category}
+                      </span>
+                      <span className="text-xs font-serif font-bold text-slate-400">
+                        0{idx + 1}
+                      </span>
+                    </div>
+
+                    <h3 className="font-serif text-lg sm:text-2xl text-ink-900 font-semibold group-hover:text-brand-700 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-[11px] sm:text-xs font-semibold text-accent-600 mt-1">
+                      {item.teluguTitle}
+                    </p>
+                    <p className="text-ink-600 text-xs sm:text-sm mt-3 leading-relaxed">
+                      {item.shortDesc}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <span className="text-xs sm:text-sm font-semibold text-brand-700 group-hover:text-brand-900">
+                      How We Treat & Symptoms
+                    </span>
+                    <span className="w-8 h-8 rounded-full bg-brand-50 group-hover:bg-brand-700 text-brand-700 group-hover:text-white flex items-center justify-center transition-all duration-300 group-hover:rotate-90">
+                      <Plus className="w-4 h-4 stroke-[2.5]" />
+                    </span>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================
+          4. HIGH-CONVERSION TRIGGER: UNWILLING PATIENT / SAFE HOME PICKUP
+         ========================================================= */}
+      <section className="py-12 sm:py-16 bg-brand-900 text-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 relative z-10">
+          <Reveal>
+            <div className="bg-dark-mesh border border-white/15 rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-8 space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-[11px] sm:text-xs font-semibold">
+                  <Ambulance className="w-4 h-4 shrink-0" />
+                  <span>{siteConfig.conversionTriggers.pickupBanner.badge}</span>
+                </div>
+
+                <h2 className="font-serif text-2xl sm:text-4xl text-white font-semibold leading-tight">
+                  {siteConfig.conversionTriggers.pickupBanner.title}
+                </h2>
+                <p className="text-xs sm:text-sm font-semibold text-brand-100">
+                  {siteConfig.conversionTriggers.pickupBanner.teluguSubtitle}
+                </p>
+                <p className="text-xs sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+                  {siteConfig.conversionTriggers.pickupBanner.description}
+                </p>
+
+                <div className="pt-2 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {siteConfig.conversionTriggers.pickupBanner.points.map(
+                    (pt, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-2 text-xs text-slate-200 bg-white/5 p-3 rounded-xl border border-white/10"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                        <span>{pt}</span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              <div className="lg:col-span-4 flex flex-col gap-3 bg-white/10 backdrop-blur-md p-5 sm:p-6 rounded-2xl border border-white/15">
+                <p className="font-serif text-lg text-white font-semibold">
+                  24/7 Assisted Pickup Helpline
+                </p>
+                <p className="text-xs text-slate-300">
+                  Speak directly with Founder D. Sreekanth Chary or our senior intake coordinator for immediate family guidance.
+                </p>
+                <a
+                  href={`tel:${siteConfig.contact.phoneRaw}`}
+                  className="w-full py-3.5 px-5 rounded-xl bg-accent-600 hover:bg-accent-500 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg transition-all"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>Call {siteConfig.contact.phoneDisplay}</span>
+                </a>
+                <a
+                  href={`https://wa.me/${siteConfig.contact.whatsappNumber}?text=${encodeURIComponent(
+                    siteConfig.conversionTriggers.pickupBanner.ctaWhatsappPrefill
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>WhatsApp for Pickup Help</span>
+                </a>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* =========================================================
+          5. INTERACTIVE FAMILY & SELF-ASSESSMENT SECTION
          ========================================================= */}
       <SelfAssessment />
 
       {/* =========================================================
-          4. NUMBERED 01-04 RECOVERY PROGRAMS
+          6. NUMBERED 01-04 RECOVERY PROGRAMS (WITH DETAIL POPUP)
          ========================================================= */}
       <section className="py-14 sm:py-24 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         <Reveal>
@@ -201,27 +357,16 @@ export default function HomePage() {
               <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-ink-900 mt-1.5 leading-tight">
                 Structured Recovery Programs
               </h2>
+              <p className="text-xs sm:text-base text-ink-600 mt-2">
+                Click any program below to view its stage-by-stage recovery roadmap and included therapies.
+              </p>
             </div>
             <Link
               href="/programs"
               className="text-xs sm:text-sm font-semibold text-brand-700 hover:text-brand-900 inline-flex items-center gap-1.5"
             >
-              View full program details <ArrowRight className="w-4 h-4" />
+              Open full programs page <ArrowRight className="w-4 h-4" />
             </Link>
-          </div>
-        </Reveal>
-
-        {/* Horizontally scrollable condition pills on mobile, wrapped on desktop */}
-        <Reveal delay={0.05}>
-          <div className="flex overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap gap-2 mb-8 sm:mb-10 no-scrollbar">
-            {siteConfig.conditionsWeTreat.map((item, i) => (
-              <span
-                key={i}
-                className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-surface border border-slate-200/90 text-xs sm:text-sm font-medium text-ink-900 whitespace-nowrap"
-              >
-                {item}
-              </span>
-            ))}
           </div>
         </Reveal>
 
@@ -262,17 +407,27 @@ export default function HomePage() {
                   </ul>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                {/* Action Footer with Popup Trigger + WhatsApp */}
+                <div className="mt-6 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProgram(program)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-ink-900 hover:bg-brand-700 text-white text-xs font-semibold transition-all"
+                  >
+                    <span>View Full Breakdown</span>
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+
                   <a
                     href={`https://wa.me/${siteConfig.contact.whatsappNumber}?text=${encodeURIComponent(
                       program.whatsappPrefill
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs sm:text-sm font-semibold text-brand-700 hover:text-brand-900 inline-flex items-center gap-1.5"
+                    className="text-xs sm:text-sm font-semibold text-brand-700 hover:text-brand-900 inline-flex items-center gap-1"
                   >
-                    Inquire about Program {program.id}{" "}
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Inquire</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </a>
                 </div>
               </div>
@@ -282,7 +437,7 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================
-          5. INTERACTIVE "GLIMPSE OF THE CENTRE" WALKTHROUGH
+          7. INTERACTIVE "GLIMPSE OF THE CENTRE" WALKTHROUGH
          ========================================================= */}
       <section className="py-14 sm:py-24 bg-surface/80 border-y border-slate-200/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
@@ -302,7 +457,6 @@ export default function HomePage() {
             </div>
           </Reveal>
 
-          {/* Space Selector Pills */}
           <div className="flex overflow-x-auto pb-2.5 sm:pb-0 sm:flex-wrap gap-2 mb-6 sm:mb-10 no-scrollbar">
             {siteConfig.campusSpaces.map((space) => {
               const isSelected = activeSpace.id === space.id;
@@ -331,15 +485,14 @@ export default function HomePage() {
               transition={{ duration: 0.25 }}
               className="grid grid-cols-1 lg:grid-cols-12 bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200 shadow-apple"
             >
-              <div className="lg:col-span-7 relative h-60 sm:h-80 lg:h-auto lg:min-h-[420px] bg-slate-100">
-  <FacilityImage
-    src={activeSpace.imagePlaceholder}
-    fallbackSrc={activeSpace.imageFallback}
-    alt={activeSpace.title}
-    privacyBlur={activeSpace.privacyBlur}
-    blurZone={activeSpace.blurZone}
-  />
-</div>
+              <div className="lg:col-span-7 relative h-56 sm:h-80 lg:h-auto lg:min-h-[400px] bg-slate-100">
+                <FacilityImage
+                  src={activeSpace.imagePlaceholder}
+                  altCandidates={activeSpace.altCandidates}
+                  fallbackSrc={activeSpace.imageFallback}
+                  alt={activeSpace.title}
+                />
+              </div>
 
               <div className="lg:col-span-5 p-5 sm:p-9 lg:p-12 flex flex-col justify-between">
                 <div>
@@ -382,7 +535,7 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================
-          6. FREQUENTLY ASKED QUESTIONS
+          8. FREQUENTLY ASKED QUESTIONS
          ========================================================= */}
       <section className="py-14 sm:py-24 max-w-4xl mx-auto px-4 sm:px-8">
         <Reveal>
@@ -427,6 +580,25 @@ export default function HomePage() {
           })}
         </div>
       </section>
+
+      {/* =========================================================
+          DYNAMIC APPLE POPUP MODALS
+         ========================================================= */}
+      <ConditionDetailModal
+        condition={selectedCondition}
+        onClose={() => setSelectedCondition(null)}
+        phoneDisplay={siteConfig.contact.phoneDisplay}
+        phoneRaw={siteConfig.contact.phoneRaw}
+        whatsappNumber={siteConfig.contact.whatsappNumber}
+      />
+
+      <ProgramDetailModal
+        program={selectedProgram}
+        onClose={() => setSelectedProgram(null)}
+        phoneDisplay={siteConfig.contact.phoneDisplay}
+        phoneRaw={siteConfig.contact.phoneRaw}
+        whatsappNumber={siteConfig.contact.whatsappNumber}
+      />
     </div>
   );
 }

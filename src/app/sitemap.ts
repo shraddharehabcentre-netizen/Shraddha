@@ -1,8 +1,7 @@
 import { MetadataRoute } from "next";
-import { siteConfig } from "@/config/siteConfig";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = siteConfig.brand.url || "https://shraddha-rehab.vercel.app";
+  const baseUrl = "https://shraddharehab.in";
 
   return [
     {

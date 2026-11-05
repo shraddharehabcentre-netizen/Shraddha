@@ -60,6 +60,24 @@ export default function ContactPage() {
       setStatus("error");
       setErrorMsg("Network error. Please call or WhatsApp us directly.");
     }
+
+    // Add this inside handleSubmit in src/app/contact/page.tsx:
+try {
+  await fetch("/api/leads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: formData.get("name"),
+      phone: formData.get("phone"),
+      seeking: formData.get("seeking_help_for"),
+      message: formData.get("message"),
+      type: inquiryType,
+      date: formData.get("preferred_visit_date") || "Immediate Callback",
+    }),
+  });
+} catch {
+  // Silent background save
+}
   }
 
   return (

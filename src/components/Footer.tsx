@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Phone, Mail, MapPin, ArrowUpRight, MessageCircle } from "lucide-react";
+import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { ShraddhaLogo } from "@/components/ui/ShraddhaLogo";
 
@@ -109,6 +109,16 @@ export function Footer() {
           </div>
         </div>
 
+{/* Local SEO "Near Me" & Hyderabad Service Areas Strip */}
+<div className="py-6 border-b border-slate-800/80 text-[11px] sm:text-xs text-slate-400 leading-relaxed space-y-2">
+          <p className="font-semibold text-slate-300">
+            Top-Rated Alcohol Addiction Treatment Programme & Drug Abuse Treatment Center in Hyderabad:
+          </p>
+          <p>
+            Looking for the <strong className="text-slate-300 font-medium">best de-addiction centres in Hyderabad</strong> or an <strong className="text-slate-300 font-medium">alcohol abuse treatment center near you</strong>? Located in Parvathapur, Uppal, Shraddha Rehabilitation Centre provides 24/7 medically supervised detox, residential rehabilitation, and safe assisted home pickup across <span className="text-slate-300">Uppal, LB Nagar, Dilsukhnagar, Secunderabad, ECIL, Habsiguda, Nacharam, Boduppal, Medipally, Tarnaka, Kukatpally, Kompally, Gachibowli, Warangal, Nalgonda, Suryapet, Khammam, Karimnagar</span>, and all districts of Telangana.
+          </p>
+        </div>
+        
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} {siteConfig.brand.fullName}. All rights reserved.</p>
           <p>Strict Patient Privacy & Medical Confidentiality Maintained.</p>

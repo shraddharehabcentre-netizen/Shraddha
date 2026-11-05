@@ -15,7 +15,6 @@ import {
   MessageCircle,
   Quote,
 } from "lucide-react";
-import { siteConfig } from "@/config/siteConfig";
 import { Reveal } from "@/components/ui/Reveal";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 
